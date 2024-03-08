@@ -13,10 +13,9 @@ function AccountOperations() {
   const {
     loan: currentLoan,
     loanPurpose: currentLoanPurpose,
-    balance,
+    messages,
     isLoading,
   } = useSelector((store) => store.account);
-  console.log(balance);
 
   function handleDeposit() {
     if (!depositAmount) return;
@@ -49,6 +48,7 @@ function AccountOperations() {
         <div>
           <label>Deposit</label>
           <input
+            min={0}
             type="number"
             value={depositAmount}
             onChange={(e) => setDepositAmount(+e.target.value)}
@@ -71,6 +71,7 @@ function AccountOperations() {
           <label>Withdraw</label>
           <input
             type="number"
+            min={0}
             value={withdrawalAmount}
             onChange={(e) => setWithdrawalAmount(+e.target.value)}
           />
@@ -82,6 +83,7 @@ function AccountOperations() {
         <div>
           <label>Request loan</label>
           <input
+            min={0}
             type="number"
             value={loanAmount}
             onChange={(e) => setLoanAmount(+e.target.value)}
@@ -92,17 +94,24 @@ function AccountOperations() {
             onChange={(e) => setLoanPurpose(e.target.value)}
             placeholder="Loan purpose"
           />
-          <button onClick={handleRequestLoan}>Request loan</button>
+          <button disabled={currentLoan > 0} onClick={handleRequestLoan}>
+            {currentLoan > 0 ? "Loan Blocked" : "Request loan"}
+          </button>
         </div>
         {currentLoan > 0 && (
           <div>
             <span>
-              Pay back ${currentLoan}({currentLoanPurpose})
+              Pay back ${currentLoan} ({currentLoanPurpose})
             </span>
             <button onClick={handlePayLoan}>Pay loan</button>
           </div>
         )}
       </div>
+      <ul className="list">
+        {messages.map((msg, index) => (
+          <li key={index}>{msg}</li>
+        ))}
+      </ul>
     </div>
   );
 }

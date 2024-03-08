@@ -1,10 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { formatCurrency } from "../../utils";
 
 const initialState = {
   balance: 0,
   loan: 0,
   loanPurpose: "",
   isLoading: false,
+  messages: [],
 };
 
 const accountSlice = createSlice({
@@ -14,9 +16,11 @@ const accountSlice = createSlice({
     deposit(state, action) {
       state.balance += action.payload;
       state.isLoading = false;
+      state.messages = [...state.messages, `Deposit of ${formatCurrency(action.payload)}`];
     },
     withdraw(state, action) {
       state.balance -= action.payload;
+      state.messages = [...state.messages, `Withdrawal of ${formatCurrency(action.payload)}`];
     },
     requestLoan: {
       prepare(amount, purpose) {
@@ -29,16 +33,21 @@ const accountSlice = createSlice({
         state.loan = action.payload.amount;
         state.loanPurpose = action.payload.purpose;
         state.balance += action.payload.amount;
+        state.messages = [
+          ...state.messages,
+          `Loan of ${formatCurrency(action.payload.amount)} for ${action.payload.purpose}`,
+        ];
       },
     },
     payLoan(state) {
       state.balance -= state.loan;
       state.loan = 0;
       state.loanPurpose = "";
+      state.messages = [...state.messages, "Loan paid off!"];
     },
     convertingCurrency(state) {
-      state.isLoading = true
-    }
+      state.isLoading = true;
+    },
   },
 });
 
@@ -47,7 +56,7 @@ export const { withdraw, requestLoan, payLoan } = accountSlice.actions;
 export function deposit(amount, currency) {
   if (currency === "USD") return { type: "account/deposit", payload: amount };
 
-  return async function (dispatch, getState) {
+  return async function (dispatch) {
     dispatch({ type: "account/convertingCurrency" });
     // API call
 
@@ -65,7 +74,7 @@ export function deposit(amount, currency) {
 
 export default accountSlice.reducer;
 
-// classc Redux
+// Classic Redux
 
 // export default function accountReducer(state = initialStateAccount, action) {
 //   switch (action.type) {
